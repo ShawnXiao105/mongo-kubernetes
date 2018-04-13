@@ -1,0 +1,39 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: mongo
+  name: mongo
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+      - image: mongo:3.6.3
+        imagePullPolicy: IfNotPresent
+        name: mongo
+        ports:
+        - containerPort: 27017
+          name: mongo
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /data/db
+          name: mongo-persistent-storage
+      restartPolicy: Always
+      volumes:
+      - gcePersistentDisk:
+          fsType: ext4
+          pdName: mongo-disk
+        name: mongo-persistent-storage
